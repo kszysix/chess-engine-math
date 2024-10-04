@@ -1,0 +1,4 @@
+{
+    "python.analysis.extraPaths": ["./sources"],
+    "python.defaultInterpreterPath": "/home/kris/projects/chess-engine-math/chess-engine-math/.venv/bin/python3"
+}
