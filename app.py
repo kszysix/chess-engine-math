@@ -2,20 +2,28 @@ import pandas as pd
 import numpy as np
 import scipy.stats as sps
 import matplotlib.pyplot as plt
-
+import sys
 import chess
 import chess.engine
 import chessboard
 from chessboard import display
 import chess.svg
+import cairosvg
+from cairosvg import svg2png
+
+
+# to measure exec time 
+from timeit import default_timer as timer 
+
 
 def its_draw(board):
     draw = False
     if (board.is_stalemate() or # draw
         board.is_fivefold_repetition() or 
-        board.is_insufficient_material() or
-        board.is_seventyfive_moves() or 
-        board.can_claim_draw() #inclues 3 fold repetition and 50 move rule
+        board.is_insufficient_material() 
+        # or
+        # board.is_seventyfive_moves() or 
+        # board.can_claim_draw() #inclues 3 fold repetition and 50 move rule
         ):
         draw = True
     return draw
@@ -32,7 +40,7 @@ def simple_board_score(board):
         score = 0.0
         for (piece, value) in [(chess.PAWN, 100), 
                                (chess.BISHOP, 333), 
-                               (chess.KING, 2000), 
+                               (chess.KING, 1100), 
                                (chess.QUEEN, 950), 
                                (chess.KNIGHT, 305),
                                (chess.ROOK, 563)]:
@@ -102,36 +110,60 @@ def get_best_move(board, depth, is_white_turn):
     else:
         best_move = moves_scores_map['Move'].values[0]
         best_score = moves_scores_map['Score'].values[0]
-    print("best_move: " + best_move.uci())
     print("best_score: " + str(best_score))
     return best_move
 
+def print_game(board, move):
+    boardsvg = chess.svg.board(board=board)
+    filename = "move" + str(move) + ".png"
+    svg2png(bytestring=boardsvg,write_to="outputs/" + filename)
+
+def run_game(depth):
+    board = chess.Board("r1bqkb1r/1pp2ppp/p1n1pn2/1B1p4/3PP3/2N2N2/PPP2PPP/R1BQK2R w KQkq - 0 6")
+    # board = chess.Board()
+    score = simple_board_score(board)
+    print("score: " + str(score))
+    engine = chess.engine.SimpleEngine.popen_uci('./stockfish-ubuntu-x86-64-avx2')
+    # stockfish = engine.play(board,
+    #                 limit=chess.engine.Limit(2))
+    # stock_move = stockfish.move
+    print_game(board, 0)
+    # board.push(stock_move)
+    count_moves = 1
+    while (not board.is_game_over()) and (not its_draw(board)):
+        start = timer()
+        move_best = get_best_move(board,depth,True)
+
+        board.push(move_best)
+        print("minimax:", timer()-start)   
+        print("minimax:" + str(move_best))   
+        ## Stockfish plays
+        if( board.is_game_over()) or ( its_draw(board)):
+            break
+        start = timer()
+        stockfish = engine.play(board,
+                    limit=chess.engine.Limit(depth=3, time=0.1))
+        stock_move = stockfish.move
+
+        board.push(stock_move)
+        if count_moves % 5 == 0:
+            print_game(board, count_moves)
+        count_moves += 1
+        # end while
+        print("stock:", timer()-start)   
+        print("stock: " + str(stock_move))
+
+    print("end score: " + str(score))
+    print(board)
+
+    # outputfile = open('name.svg', "w")
+    # outputfile.write(boardsvg)
+    # outputfile.close()
+    squares = board.pieces
+
+    boardsvg = chess.svg.board(board=board)
+    svg2png(bytestring=boardsvg,write_to='output.png')
+    sys.exit()
 
 
-board = chess.Board("r1b1kb1r/ppp2ppp/2n1pn2/1B1pq3/3PPQ2/2N5/PPP2PPP/R1B1K1NR w KQkq - 0 7")
-score = simple_board_score(board)
-print("score: " + str(score))
-engine = chess.engine.SimpleEngine.popen_uci('./stockfish-ubuntu-x86-64-avx2')
-# stockfish = engine.play(board,
-#                 limit=chess.engine.Limit(2))
-# stock_move = stockfish.move
-
-# board.push(stock_move)
-count = 1
-# while (not board.is_game_over()) and (not its_draw(board)):
-#     move_best = get_best_move(board,2,True)
-
-#     board.push(move_best)
-
-#     ## Stockfish plays
-#     stockfish = engine.play(board,
-#                    limit=chess.engine.Limit(1))
-#     stock_move = stockfish.move
-
-#     board.push(stock_move)
-#     count += 1
-#end while
-
-print("end score: " + str(score))
-print(board)
-chess.svg.board(board, size=350)
+# run_game(4)
