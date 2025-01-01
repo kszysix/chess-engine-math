@@ -1,0 +1,50 @@
+service: chess-app
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: eu-north-1
+  iam:
+    role: arn:aws:iam::288761736682:role/chess-lambda-role
+
+plugins:
+  - serverless-offline
+
+functions:
+  login:
+    handler: functions/login/handler.handler
+    events:
+      - http:
+          path: /api/login
+          method: post
+          cors: true
+  logout:
+    handler: functions/logout/handler.handler
+    events:
+      - http:
+          path: /api/logout
+          method: post
+          cors: true
+  startRandomGame:
+    handler: functions/startRandomGame/handler.handler
+    events:
+      - http:
+          path: /api/game/start/random
+          method: post
+          cors: true
+  makeMove:
+    handler: functions/makeMove/handler.handler
+    events:
+      - http:
+          path: /api/game/{gameId}/move
+          method: post
+          cors: true
+  moveEventOnDragStart:
+    handler: functions/moveEventOnDragStart/handler.handler
+    events:
+      - http:
+          path: /api/game/{gameId}/move/onDragStart
+          method: post
+          cors: true

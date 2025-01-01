@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard-1.0.0.min.css" />
+    <style>
+        #board {
+          width: 400px;
+        }
+    </style>
+</head>
+<body>
+  <div id="board" style="width: 400px"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.6/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard-1.0.0.min.js"></script>
+  
+    <script>
+      const board = Chessboard('board');
+      const game = new Chess();
+      
+      board.on('move', (move) => {
+        game.move(move.from + "-" + move.to);
+        board.position(game.fen());
+        
+        // Example: Log the fen
+        console.log(game.fen());
+      })
+    </script>
+</body>
+</html>

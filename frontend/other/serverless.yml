@@ -1,0 +1,27 @@
+service: serverless-node-app
+provider:
+  name: aws
+  runtime: nodejs16.x
+
+functions:
+  app:
+    handler: main.handler
+    events:
+      - http:
+          path: /
+          method: any
+      - http:
+          path: /hello
+          method: GET
+      - http:
+          path: /{proxy+}
+          method: any
+  htmlResponse:
+    handler: index.handler  # Points to the handler function in your handler.js file
+    events:
+      - http:
+          path: /index  # The path at which the HTML response is available
+          method: get  # HTTP method (GET in this case)
+          cors: true 
+plugins:
+  - serverless-offline

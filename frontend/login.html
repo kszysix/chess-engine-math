@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <title>Login</title>
+      <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+          }
+  
+          .login-container {
+             background-color: #fff;
+             padding: 30px;
+             border-radius: 8px;
+             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+             text-align: center;
+             display: flex;
+              flex-direction: column; /* This is the crucial change */
+             align-items: center;
+  
+          }
+  
+           input {
+              padding: 10px;
+              margin: 8px 0;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              width: 200px;
+           }
+  
+           button {
+             padding: 10px 20px;
+             margin-top: 15px;
+             background-color: #5cb85c;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+            }
+        </style>
+  </head>
+  <body>
+    <div class="login-container">
+        <h2>Login</h2>
+      <input type="text" id="username" placeholder="Username"><br><br>
+      <input type="password" id="password" placeholder="Password"><br><br>
+      <button onclick="login()">Login</button>
+    </div>
+        <script>
+           const API_BASE_URL =  'http://localhost:3000/dev';
+          async function login() {
+              const username = document.getElementById('username').value;
+              const password = document.getElementById('password').value;
+              try {
+                  const response = await fetch(`${API_BASE_URL}/api/login`,{
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({username: username, password: password})
+                  });
+
+                  if (response.ok) {
+                      const data = await response.json()
+                      localStorage.setItem('token', data.token);
+                      window.location.href = "/game.html";
+                  } else {
+                      alert('Login failed');
+                  }
+              }
+              catch(error)
+              {
+                  console.error(error);
+                  alert('Login failed, check server logs');
+              }
+          }
+        </script>
+  </body>
+  </html>

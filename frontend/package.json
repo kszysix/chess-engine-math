@@ -1,0 +1,30 @@
+{
+  "name": "chess-app",
+  "version": "1.0.0",
+  "description": "Serverless Chess App",
+  "dependencies": {
+    "@chrisoakman/chessboard2": "^0.5.0",
+    "@chrisoakman/chessboardjs": "^1.0.0",
+    "aws-sdk": "^2.1692.0",
+    "chess.js": "^1.0.0-beta.6",
+    "chessboardjs": "^0.0.1",
+    "dotenv": "^16.3.1",
+    "jquery": ">=3.4.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "css-loader": "^6.10.0",
+    "csso": "3.5.1",
+    "fs-plus": "3.1.1",
+    "kidif": "1.1.0",
+    "mustache": "2.3.0",
+    "serverless": "^4.4.18",
+    "serverless-offline": "^14.4.0",
+    "standard": "10.0.2",
+    "style-loader": "^3.3.4",
+    "uglify-js": "3.6.0"
+  },
+  "scripts": {
+    "sls-offline": "sls offline"
+  }
+}

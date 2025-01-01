@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="./libs/css/chessboard-1.0.0.min.css" />
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="./libs/js/chessboard-1.0.0.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            min-height: 100vh;
+            /* Ensure content fills the viewport height */
+        }
+
+        .game-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            /* Changed to row for side by side layout */
+            align-items: start;
+            justify-content: center;
+            gap: 20px;
+            /* Space between board and history */
+        }
+
+
+        #board {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        #move-history-container {
+            width: 200px;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .alert-check {
+            background-color: #ffeeba;
+            color: #856404;
+            border: 1px solid #ffe082;
+        }
+
+        .alert-checkmate {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-draw {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div>
+            <div id="board" style="width: 400px"></div>
+            <div id="status"></div>
+        </div>
+        <div id="move-history-container">
+            <h2>Move History</h2>
+            <ul id="move-history"></ul>
+        </div>
+        <div id="game-over-message" style="display: none;" class="alert"></div>
+    </div>
+    <script type="module">
+        import './libs/chess.min.js'
+        const API_BASE_URL = 'http://localhost:3000/dev';
+
+
+
+
+        
+        var config = {
+            draggable: true,
+            position: 'start',
+            onDrop: onDrop,
+            sparePieces: true,
+            onDragStart: onDragStart
+        }
+        const board = Chessboard('board', config);
+        let gameId;
+        let game = new Chess();
+        let token;
+        let fromPosition;
+        let toPosition;
+        const moveHistoryList = document.getElementById("move-history");
+
+        // Get the token from localStorage
+        token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = "/login.html"
+        }
+
+        
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            const gameOverMessage = document.getElementById('game-over-message');
+            let status = "";
+            if (game.in_checkmate()) {
+                status = "Checkmate";
+                gameOverMessage.style.display = "block";
+                gameOverMessage.classList.add('alert-checkmate');
+                if (game.turn() === 'w') {
+                    gameOverMessage.textContent = "Black wins!";
+                } else {
+                    gameOverMessage.textContent = "White wins!";
+                }
+
+            } else if (game.in_draw()) {
+                status = "Draw";
+                gameOverMessage.style.display = "block";
+                gameOverMessage.classList.add('alert-draw');
+                gameOverMessage.textContent = "Draw!";
+
+            } else if (game.in_check()) {
+                status = "Check";
+                gameOverMessage.style.display = "block";
+                gameOverMessage.classList.add('alert-check');
+                gameOverMessage.textContent = "Check";
+            } else {
+                status = "Game In progress";
+                gameOverMessage.style.display = "none";
+            }
+            statusEl.textContent = status;
+        }
+
+
+        async function startGame() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/game/start/random`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    gameId = data.gameId;
+                    game = new Chess(data.fen);
+                    board.position(data.fen);
+                    updateStatus();
+                } else {
+                    alert("Game start failed.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Error starting game.");
+            }
+
+        }
+
+        updateStatus();
+        startGame();
+
+    </script>
+</body>
+
+</html>
